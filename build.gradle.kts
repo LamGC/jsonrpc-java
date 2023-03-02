@@ -2,6 +2,7 @@ plugins {
     `java-library`
     `maven-publish`
     jacoco
+    signing
 }
 
 group = "net.lamgc"
@@ -32,18 +33,77 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.9.2")
 }
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(11))
+tasks.withType<Javadoc> {
+    options {
+        encoding = "UTF-8"
     }
 }
 
-tasks.compileJava {
-    options.compilerArgs.add("-parameters")
-    options.encoding = "UTF-8"
-    options.release.set(11)
+java {
+    withJavadocJar()
+    withSourcesJar()
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
 }
 
-tasks.getByName<Test>("test") {
+tasks.test {
     useJUnitPlatform()
+}
+
+// We support "reproducible builds" to ensure that everyone can review and trust this project!
+tasks.withType<AbstractArchiveTask>().configureEach {
+    isPreserveFileTimestamps = false
+    isReproducibleFileOrder = true
+}
+
+publishing {
+    repositories {
+        maven("https://git.lamgc.me/api/packages/LamGC/maven") {
+            credentials {
+                username = project.properties["repo.credentials.self-git.username"].toString()
+                password = project.properties["repo.credentials.self-git.password"].toString()
+            }
+        }
+    }
+
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+
+            pom {
+                name.set("jsonrpc-java")
+                description.set("Simple and flexible JsonRpc library.")
+                url.set("https://github.com/LamGC/jsonrpc-java")
+                licenses {
+                    license {
+                        name.set("Apache License 2.0")
+                        url.set("https://www.apache.org/licenses/LICENSE-2.0")
+                    }
+                }
+                developers {
+                    developer {
+                        id.set("LamGC")
+                        name.set("LamGC")
+                        email.set("lam827@lamgc.net")
+                        url.set("https://github.com/LamGC")
+                    }
+                }
+                scm {
+                    connection.set("scm:git:https://github.com/LamGC/jsonrpc-java.git")
+                    developerConnection.set("scm:git:https://github.com/LamGC/jsonrpc-java.git")
+                    url.set("https://github.com/LamGC/jsonrpc-java")
+                }
+                issueManagement {
+                    url.set("https://github.com/LamGC/jsonrpc-java/issues")
+                    system.set("Github Issues")
+                }
+            }
+        }
+    }
+
+}
+
+signing {
+    useGpgCmd()
+    sign(publishing.publications["maven"])
 }
