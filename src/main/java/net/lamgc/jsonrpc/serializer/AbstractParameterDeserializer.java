@@ -3,7 +3,6 @@ package net.lamgc.jsonrpc.serializer;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
 import net.lamgc.jsonrpc.JsonRpcRequest;
 import net.lamgc.jsonrpc.JsonRpcUtils;
 
@@ -53,7 +52,7 @@ public abstract class AbstractParameterDeserializer implements ParameterDeserial
      * @param parameter 目标参数对象.
      * @param paramJson 从 RPC 请求传入的 JSON 形式参数.
      * @return 返回对应类型的参数对象.
-     * @throws JsonParseException 如果转换失败, 可抛出异常.
+     * @throws Exception 如果转换失败, 可抛出异常.
      */
     protected abstract Object toParameterObject(Method method, Parameter parameter, JsonElement paramJson) throws Exception;
 

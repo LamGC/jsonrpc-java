@@ -19,6 +19,7 @@ public interface ReturnValueSerializer {
      * @param method      对应的方法对象.
      * @param returnValue 方法所返回的值, 返回值有可能是 null.
      * @return 返回序列化后的方法对象.
+     * @throws Exception 当无法完成序列化时可抛出异常.
      */
     JsonElement serializer(Method method, Object returnValue) throws Exception;
 
