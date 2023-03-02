@@ -100,6 +100,9 @@ public abstract class JsonRpcExecutor {
             logger.error("An exception occurred while invoking the method. (Method: " +
                     method.getDeclaringClass().getName() + "." + method.getName() + ")", e);
             if (e instanceof InvocationTargetException) {
+                if (e.getCause() instanceof JsonRpcExecuteException) {
+                    return new JsonRpcResponse(((JsonRpcExecuteException) e.getCause()).getError(), request.getId());
+                }
                 return new JsonRpcResponse(JsonRpcErrors.INTERNAL_ERROR
                         .toRpcError(JsonRpcUtils.exceptionToJsonObject(e.getCause(), true, true)),
                         request.getId());

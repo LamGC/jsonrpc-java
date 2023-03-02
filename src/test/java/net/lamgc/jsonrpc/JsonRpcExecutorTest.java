@@ -52,6 +52,15 @@ class JsonRpcExecutorTest {
         assertTrue(response.getResult() instanceof JsonElement);
         assertEquals(JsonNull.INSTANCE, response.getResult());
 
+
+        request = new JsonRpcRequest("throwJsonRpcError", new JsonArray(), new JsonPrimitive("req2"));
+        response = normalExecutor.execute(request);
+        assertTrue(response.getResult() instanceof JsonRpcError);
+        assertEquals(1, ((JsonRpcError) response.getResult()).getCode());
+        assertEquals("Test error.", ((JsonRpcError) response.getResult()).getMessage());
+        assertNull(((JsonRpcError) response.getResult()).getData());
+
+
         request = new JsonRpcRequest("", new JsonArray(), new JsonPrimitive("req2"));
         response = normalExecutor.execute(request);
         assertTrue(response.getResult() instanceof JsonRpcError);
@@ -191,6 +200,10 @@ class JsonRpcExecutorTest {
         }
 
         private void privateMethod() {
+        }
+
+        public void throwJsonRpcError() {
+            throw new JsonRpcExecuteException(new JsonRpcError(1, "Test error.", null));
         }
 
     }
