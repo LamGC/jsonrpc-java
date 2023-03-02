@@ -1,5 +1,8 @@
 package net.lamgc.jsonrpc;
 
+/**
+ * 面向客户端的 JsonRpc 请求异常.
+ */
 public class JsonRpcRequestException extends JsonRpcException {
 
     private final JsonRpcError error;
