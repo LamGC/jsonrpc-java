@@ -59,7 +59,9 @@ public abstract class JsonRpcExecutor {
             if (method == null) {
                 throw new NoSuchElementException("Cannot find a method to process the request.");
             }
-            logger.debug("Method found: " + method.getDeclaringClass().getName() + "." + method.getName());
+            if (logger.isDebugEnabled()) {
+                logger.debug("Method found: " + method);
+            }
         } catch (Exception e) {
             if (e instanceof NoSuchElementException) {
                 logger.error("Method not found: " + request.getMethod(), e);
