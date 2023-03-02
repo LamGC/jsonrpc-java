@@ -23,24 +23,26 @@ public final class JsonRpcRequestBuilder {
 
     public JsonRpcRequest buildRequest(String method, JsonPrimitive id, Object... args) {
         Objects.requireNonNull(method);
-        Objects.requireNonNull(args);
-        JsonElement serializedParams;
-        try {
-            serializedParams = parameterSerializer.serializer(null, method, args);
-        } catch (Exception e) {
-            throw new ParameterSerializationException(e);
+        JsonElement serializedParams = null;
+        if (args != null) {
+            try {
+                serializedParams = parameterSerializer.serializer(null, method, args);
+            } catch (Exception e) {
+                throw new ParameterSerializationException(e);
+            }
         }
         return new JsonRpcRequest(method, serializedParams, id);
     }
 
     public JsonRpcRequest buildRequest(Method method, JsonPrimitive id, Object... args) {
         Objects.requireNonNull(method);
-        Objects.requireNonNull(args);
-        JsonElement serializedParams;
-        try {
-            serializedParams = parameterSerializer.serializer(method, method.getName(), args);
-        } catch (Exception e) {
-            throw new ParameterSerializationException(e);
+        JsonElement serializedParams = null;
+        if (args != null) {
+            try {
+                serializedParams = parameterSerializer.serializer(method, method.getName(), args);
+            } catch (Exception e) {
+                throw new ParameterSerializationException(e);
+            }
         }
         return new JsonRpcRequest(method.getName(), serializedParams, id);
     }

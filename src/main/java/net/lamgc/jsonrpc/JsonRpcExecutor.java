@@ -1,6 +1,8 @@
 package net.lamgc.jsonrpc;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import net.lamgc.jsonrpc.serializer.ParameterCountMismatchException;
 import net.lamgc.jsonrpc.serializer.ParameterDeserializer;
 import net.lamgc.jsonrpc.serializer.ParameterTypeMismatchException;
@@ -74,21 +76,30 @@ public abstract class JsonRpcExecutor {
             }
         }
 
-        Object[] params;
-        try {
-            params = parameterDeserializer.deserializer(method, request);
-            if (params.length != method.getParameterCount()) {
-                throw new ParameterCountMismatchException(method.getParameterCount(), params.length);
+        Object[] params = new Object[0];
+        if (method.getParameterCount() != 0) {
+            try {
+                params = parameterDeserializer.deserializer(method, request);
+                if (params.length != method.getParameterCount()) {
+                    throw new ParameterCountMismatchException(method.getParameterCount(), params.length);
+                }
+            } catch (Exception e) {
+                if (e instanceof ParameterTypeMismatchException || e instanceof ParameterCountMismatchException) {
+                    return new JsonRpcResponse(JsonRpcErrors.INVALID_PARAMS.toRpcError(), request.getId());
+                }
+
+                logger.error("An exception occurred while deserializing the parameters.", e);
+                return new JsonRpcResponse(JsonRpcErrors.CONVERT_PARAMS_FAILURE
+                        .toRpcError(JsonRpcUtils.exceptionToJsonObject(e, true, true)),
+                        request.getId());
             }
-        } catch (Exception e) {
-            if (e instanceof ParameterTypeMismatchException || e instanceof ParameterCountMismatchException) {
+        } else if (request.getParams() != null) {
+            JsonElement paramsJson = request.getParams();
+            if (paramsJson instanceof JsonArray && ((JsonArray) paramsJson).size() != 0) {
+                return new JsonRpcResponse(JsonRpcErrors.INVALID_PARAMS.toRpcError(), request.getId());
+            } else if (paramsJson instanceof JsonObject && ((JsonObject) paramsJson).size() != 0) {
                 return new JsonRpcResponse(JsonRpcErrors.INVALID_PARAMS.toRpcError(), request.getId());
             }
-
-            logger.error("An exception occurred while deserializing the parameters.", e);
-            return new JsonRpcResponse(JsonRpcErrors.CONVERT_PARAMS_FAILURE
-                    .toRpcError(JsonRpcUtils.exceptionToJsonObject(e, true, true)),
-                    request.getId());
         }
 
         Object result;

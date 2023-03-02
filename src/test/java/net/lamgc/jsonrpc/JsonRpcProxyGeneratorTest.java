@@ -73,4 +73,17 @@ class JsonRpcProxyGeneratorTest {
         assertThrows(JsonRpcRequestException.class, () -> impl.getMagicNumber(1, 2));
     }
 
+    @Test
+    void callNoParameterMethodTest() {
+        Gson gson = JsonRpcUtils.createGsonForJsonRpc();
+        NoParameterInterface impl = JsonRpcProxyGenerator.createProxy(NoParameterInterface.class, request -> new JsonRpcResponse(null, request.getId()), gson);
+        impl.tick();
+    }
+
+    private interface NoParameterInterface {
+
+        void tick();
+
+    }
+
 }

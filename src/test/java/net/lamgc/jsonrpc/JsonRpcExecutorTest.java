@@ -108,7 +108,7 @@ class JsonRpcExecutorTest {
         errResp = new TestingMapExecutor((method, request1) -> {
             throw new RuntimeException();
         }, new GsonReturnValueSerializer(gson))
-                .execute(new JsonRpcRequest("realDoNothing", new JsonArray(), new JsonPrimitive("req2")));
+                .execute(new JsonRpcRequest("plus", plusParams, new JsonPrimitive("req2")));
         assertTrue(errResp.isError());
         assertEquals(new JsonPrimitive("req2"), errResp.getId());
         assertTrue(errResp.getResult() instanceof JsonRpcError);
@@ -117,7 +117,7 @@ class JsonRpcExecutorTest {
 
 
         errResp = new TestingMapExecutor((method, request1) -> new Object[3], new GsonReturnValueSerializer(gson))
-                .execute(new JsonRpcRequest("realDoNothing", new JsonArray(), new JsonPrimitive("req2")));
+                .execute(new JsonRpcRequest("plus", plusParams, new JsonPrimitive("req2")));
         assertTrue(errResp.isError());
         assertEquals(new JsonPrimitive("req2"), errResp.getId());
         assertTrue(errResp.getResult() instanceof JsonRpcError);
@@ -126,6 +126,17 @@ class JsonRpcExecutorTest {
 
 
         errResp = normalExecutor.execute(new JsonRpcRequest("realDoNothing", plusParams, new JsonPrimitive("req2")));
+        assertTrue(errResp.isError());
+        assertEquals(new JsonPrimitive("req2"), errResp.getId());
+        assertTrue(errResp.getResult() instanceof JsonRpcError);
+        assertEquals(JsonRpcErrors.INVALID_PARAMS.code, ((JsonRpcError) errResp.getResult()).getCode());
+        assertEquals(JsonRpcErrors.INVALID_PARAMS.message, ((JsonRpcError) errResp.getResult()).getMessage());
+
+
+        JsonObject multiParams = new JsonObject();
+        multiParams.addProperty("arg1", "a");
+        multiParams.addProperty("arg2", 1);
+        errResp = normalExecutor.execute(new JsonRpcRequest("realDoNothing", multiParams, new JsonPrimitive("req2")));
         assertTrue(errResp.isError());
         assertEquals(new JsonPrimitive("req2"), errResp.getId());
         assertTrue(errResp.getResult() instanceof JsonRpcError);
