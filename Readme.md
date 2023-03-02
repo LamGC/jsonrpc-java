@@ -17,14 +17,14 @@
 
 本依赖库以确保按 [JsonRpc 2.0 规范](https://www.jsonrpc.org/specification) 进行开发，并使用足够的测试项目以确保符合规范。
 
-## 使用
+## 安装
 
 依赖库中有关序列化的操作基本使用了 Gson，这么做主要是作者的习惯（我是 Gson 爱好者 :P）。  
 首先，引入依赖库作为你项目的依赖项：
 
 ```kotlin
 dependencies {
-    implementation("net.lamgc:jsonrpc-java:0.1.0-SNAPSHOT")
+    implementation("net.lamgc:jsonrpc-java:0.1.0-RC1")
 }
 ```
 
@@ -32,12 +32,28 @@ dependencies {
 
 ```groovy
 dependencies {
-    implementation 'net.lamgc:jsonrpc-java:0.1.0-SNAPSHOT'
+    implementation 'net.lamgc:jsonrpc-java:0.1.0-RC1'
 }
 ```
 
+Maven 的话可以这样：
+
+```xml
+
+<dependency>
+    <groupId>net.lamgc</groupId>
+    <artifactId>jsonrpc-java</artifactId>
+    <version>0.1.0-RC1</version>
+</dependency>
+```
+
+由于还没正式发布 1.0.0 版本, 因此你需要将我的 Gitea
+服务器加入到你的项目仓库列表中，具体看这里：[net.lamgc:jsonrpc-java 软件包](https://git.lamgc.me/LamGC/-/packages/maven/net.lamgc-jsonrpc-java/0.1.0-rc1)
+
+## 使用
+
 创建 Gson，将 `JsonRpcRequestSerializer` 和 `JsonRpcResponseSerializer`
-绑定为 `JsonRpcRequest` 和 `JsonRpcResponse` 的类型适配器，然后启用 Null 序列化：
+注册为 `JsonRpcRequest` 和 `JsonRpcResponse` 的类型适配器，然后启用 Null 序列化：
 
 ```java
 Gson gson=new GsonBuilder()
@@ -46,15 +62,15 @@ Gson gson=new GsonBuilder()
         .serializeNulls()
         .create();
 
-// 或者，使用依赖库提供的工具类快速创建一个
-// Gson gson = JsonRpcUtils.createGsonForJsonRpc();
+// 或者，使用依赖库提供的工具类快速创建一个, 
+// 如果你需要定制, 只需要调用 gson.newGsonBuilder() 即可.
+        Gson gson=JsonRpcUtils.createGsonForJsonRpc();
 ```
 
-> 如果不启用 Null 序列化，那么 JsonRpcResponse 将无法对错误的 JsonRpcRequest
->
-生成正确的响应。（[相关规范](https://www.jsonrpc.org/specification#:~:text=If%20there%20was%20an%20error%20in%20detecting%20the%20id%20in%20the%20Request%20object%20(e.g.%20Parse%20error/Invalid%20Request)%2C%20it%20MUST%20be%20Null.)）
+> 注意：如果不启用 Null 序列化，那么 JsonRpcResponse 将无法对错误的 JsonRpcRequest
+> 生成正确的响应。（[相关规范](https://www.jsonrpc.org/specification#:~:text=If%20there%20was%20an%20error%20in%20detecting%20the%20id%20in%20the%20Request%20object%20(e.g.%20Parse%20error/Invalid%20Request)%2C%20it%20MUST%20be%20Null.)）
 
-如果有需要，你也要将你自己的类型适配器注册进去。
+如果有需要，将你所需要的类型适配器也注册进去。
 
 然后将 RPC 接口的实现绑定到一个 `JsonRpcExecutor` 中：
 
@@ -69,5 +85,23 @@ JsonRpcResponse response=rpcExecutor.execute(jsonRpcRequst);
         String json=gson.toJson(response);
 // 然后传回给客户端.
         request.sendResponse(json);
+```
+
+## 许可证
+
+```text
+Copyright 2023 LamGC
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 ```
 
