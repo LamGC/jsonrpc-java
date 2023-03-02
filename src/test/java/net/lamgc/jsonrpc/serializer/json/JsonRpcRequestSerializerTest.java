@@ -17,6 +17,7 @@ class JsonRpcRequestSerializerTest {
                 .registerTypeAdapter(JsonRpcRequest.class, new JsonRpcRequestSerializer())
                 .create();
 
+        // Deserializer Normal Request - Number ID
         JsonArray paramList = new JsonArray();
         paramList.add(42);
         paramList.add(23);
@@ -25,26 +26,31 @@ class JsonRpcRequestSerializerTest {
         assertEquals(paramList, request.getParams());
         assertEquals(new JsonPrimitive(1), request.getId());
 
+        // Deserializer Normal Request - String ID
         request = gson.fromJson("{\"jsonrpc\": \"2.0\", \"method\": \"subtract\", \"params\": [42, 23], \"id\": \"req1\"}", JsonRpcRequest.class);
         assertEquals("subtract", request.getMethod());
         assertEquals(paramList, request.getParams());
         assertEquals(new JsonPrimitive("req1"), request.getId());
 
+        // Deserializer Normal Request - No params
         request = gson.fromJson("{\"jsonrpc\": \"2.0\", \"method\": \"subtract\", \"id\": \"req1\"}", JsonRpcRequest.class);
         assertEquals("subtract", request.getMethod());
         assertNull(request.getParams());
         assertEquals(new JsonPrimitive("req1"), request.getId());
 
+        // Deserializer Normal Request - No ID
         request = gson.fromJson("{\"jsonrpc\": \"2.0\", \"method\": \"subtract\", \"params\": [42, 23]}", JsonRpcRequest.class);
         assertEquals("subtract", request.getMethod());
         assertEquals(paramList, request.getParams());
         assertNull(request.getId());
 
+        // Deserializer Normal Request - No params & No ID
         request = gson.fromJson("{\"jsonrpc\": \"2.0\", \"method\": \"subtract\"}", JsonRpcRequest.class);
         assertEquals("subtract", request.getMethod());
         assertNull(request.getParams());
         assertNull(request.getId());
 
+        // Deserializer Normal Request - Named params
         JsonObject namedParams = new JsonObject();
         namedParams.addProperty("subtrahend", 23);
         namedParams.addProperty("minuend", 42);
@@ -53,11 +59,13 @@ class JsonRpcRequestSerializerTest {
         assertEquals(namedParams, request.getParams());
         assertEquals(new JsonPrimitive(3), request.getId());
 
+        // Deserializer Normal Request - Named params & No ID
         request = gson.fromJson("{\"jsonrpc\": \"2.0\", \"method\": \"subtract\", \"params\": {}}", JsonRpcRequest.class);
         assertEquals("subtract", request.getMethod());
         assertEquals(new JsonObject(), request.getParams());
         assertNull(request.getId());
 
+        // Deserializer Normal Request - Params list & No params
         request = gson.fromJson("{\"jsonrpc\": \"2.0\", \"method\": \"subtract\", \"params\": []}", JsonRpcRequest.class);
         assertEquals("subtract", request.getMethod());
         assertEquals(new JsonArray(), request.getParams());
@@ -135,7 +143,7 @@ class JsonRpcRequestSerializerTest {
         assertTrue(jsonObj.has(JSON_RPC_ID_FIELD));
         assertEquals(new JsonPrimitive(1), jsonObj.get(JSON_RPC_ID_FIELD));
 
-
+        // Normal request - named params
         json = gson.toJsonTree(new JsonRpcRequest("testMethod", new JsonObject(), new JsonPrimitive(1)));
         assertTrue(json instanceof JsonObject, "");
         jsonObj = json.getAsJsonObject();
@@ -150,7 +158,7 @@ class JsonRpcRequestSerializerTest {
         assertTrue(jsonObj.has(JSON_RPC_ID_FIELD));
         assertEquals(new JsonPrimitive(1), jsonObj.get(JSON_RPC_ID_FIELD));
 
-
+        // Notification
         json = gson.toJsonTree(new JsonRpcRequest("testMethod", new JsonObject(), null));
         assertTrue(json instanceof JsonObject, "");
         jsonObj = json.getAsJsonObject();
@@ -164,7 +172,7 @@ class JsonRpcRequestSerializerTest {
         assertTrue(jsonObj.get(JSON_RPC_REQUEST_PARAMS_FIELD).isJsonObject());
         assertFalse(jsonObj.has(JSON_RPC_ID_FIELD));
 
-
+        // Notification - no params
         json = gson.toJsonTree(new JsonRpcRequest("testMethod", null, null));
         assertTrue(json instanceof JsonObject, "");
         jsonObj = json.getAsJsonObject();
@@ -176,7 +184,7 @@ class JsonRpcRequestSerializerTest {
         assertEquals("testMethod", jsonObj.get(JSON_RPC_REQUEST_METHOD_FIELD).getAsString());
         assertFalse(jsonObj.has(JSON_RPC_REQUEST_PARAMS_FIELD));
 
-
+        // Bad request - No method
         assertThrows(IllegalArgumentException.class, () -> {
             Field field = JsonRpcRequest.class.getDeclaredField("method");
             field.setAccessible(true);
