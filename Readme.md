@@ -56,15 +56,15 @@ Maven 的话可以这样：
 注册为 `JsonRpcRequest` 和 `JsonRpcResponse` 的类型适配器，然后启用 Null 序列化：
 
 ```java
-Gson gson=new GsonBuilder()
-        .registerTypeAdapter(JsonRpcRequest.class,new JsonRpcRequestSerializer())
-        .registerTypeAdapter(JsonRpcResponse.class,new JsonRpcResponseSerializer())
+Gson gson = new GsonBuilder()
+        .registerTypeAdapter(JsonRpcRequest.class, new JsonRpcRequestSerializer())
+        .registerTypeAdapter(JsonRpcResponse.class, new JsonRpcResponseSerializer())
         .serializeNulls()
         .create();
 
 // 或者，使用依赖库提供的工具类快速创建一个, 
 // 如果你需要定制, 只需要调用 gson.newGsonBuilder() 即可.
-        Gson gson=JsonRpcUtils.createGsonForJsonRpc();
+Gson gson = JsonRpcUtils.createGsonForJsonRpc();
 ```
 
 > 注意：如果不启用 Null 序列化，那么 JsonRpcResponse 将无法对错误的 JsonRpcRequest
@@ -75,16 +75,18 @@ Gson gson=new GsonBuilder()
 然后将 RPC 接口的实现绑定到一个 `JsonRpcExecutor` 中：
 
 ```java
-JsonRpcExecutor rpcExecutor=new SimpleJsonRpcExecutor(new RemoteInterfaceImpl(),gson);
+Object impl = new RemoteInterfaceImpl();
+JsonRpcExecutor rpcExecutor = new SimpleJsonRpcExecutor(impl, gson);
 ```
 
 然后尝试接收一个请求，并传入 JsonRpcExecutor 进行处理，并返回给调用方：
 
 ```java
-JsonRpcResponse response=rpcExecutor.execute(jsonRpcRequst);
-        String json=gson.toJson(response);
+JsonRpcRequest request = gson.fromJson(json, JsonRpcRequest.class);
+JsonRpcResponse response = rpcExecutor.execute(request);
+String json = gson.toJson(response);
 // 然后传回给客户端.
-        request.sendResponse(json);
+request.sendResponse(json);
 ```
 
 ## 许可证
